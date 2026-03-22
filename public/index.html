@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TerraStack</title>
+    <link rel="icon" type="image/x-icon" href="static/img/favicon.png">
+    <link rel="stylesheet" href="static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light navbar-custom">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">TerraStack</a>
+
+                <button class="navbar-toggler shadow-none border-0 px-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <form class="d-flex mx-auto my-3 my-lg-0 w-100" role="search" style="max-width: 450px;">
+                        <input class="form-control form-control-search shadow-none" type="search" placeholder="Search topics..." aria-label="Search"/>
+                        <button class="btn btn-search text-white fw-bold" style="border-radius: 0 8px 8px 0;" type="submit">Search</button>
+                    </form>
+
+                    <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-3 ms-lg-4">
+                        
+                        <a href="ask.html" class="btn btn-ask fw-bold px-3">Ask Question</a>
+
+                        <!-- <div class="user-unauth d-flex flex-column flex-lg-row gap-2">
+                            <a href="login.html" class="btn btn-outline-auth fw-bold px-3">Log in</a>
+                            <a href="signup.html" class="btn btn-auth fw-bold px-3">Sign up</a>
+                        </div>  -->
+                       
+                        <div class="user-auth d-flex align-items-center gap-2">
+                            <img src="static/img/avatar1.jpeg" class="user-avatar" alt="User">
+                            <div class="user-section">
+                                <div class="content_name">xah7p</div>
+                                <div class="content_links">
+                                    <a href="profile.html">Settings</a> |
+                                    <a href="#">Logout</a>
+                                </div>
+                            </div>
+                        </div> 
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container my-4 flex-grow-1">
+        <div class="row">
+            <section class="col-12 col-lg-9 mb-4">
+                
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+                    <h3 class="m-0" style="color: var(--text-main); font-weight: 700;">New Questions</h3>
+                    <a href="hot.html" class="text-decoration-none" style="color: var(--accent-primary); font-weight: 500;">Hot Questions -></a>
+                </div>
+
+                <div class="question-list">
+                    
+                    <div class="card question-card mb-4">
+                        <div class="card-body d-flex gap-3">
+                            <div class="d-flex flex-column align-items-center" style="min-width: 60px;">
+                                <img src="static/img/avatar3.jpg" class="rounded mb-2" style="width: 40px; height: 40px; background-color: #eee;" alt="Avatar">
+                                <button class="vote-btn" title="Upvote">&#9650;</button>
+                                <div class="vote-count">5</div>
+                                <button class="vote-btn" title="Downvote">&#9660;</button>
+                            </div>
+                            
+                            <div class="flex-grow-1">
+                                <h4 class="question-title mb-1">
+                                    <a href="question.html">How to defeat the Wall of Flesh effectively in Master Mode?</a>
+                                </h4>
+                                <p class="card-text text-secondary mb-2" style="font-size: 0.95rem;">
+                                    I have full Beetle armor and a Megashark, but I keep dying to the lasers. Is there a specific bridge length or potion setup I should use? Any tips are appreciated.
+                                </p>
+                                
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <a href="tag.html" class="badge px-2 py-1 text-decoration-none" style="background-color: #b35d5d; color: white;">#boss-guides</a>
+                                        <a href="tag.html" class="badge px-2 py-1 text-decoration-none" style="background-color: #c98a4b; color: white;">#hardmode</a>
+                                    </div>
+                                    <div class="d-flex gap-3 text-muted" style="font-size: 0.85rem;">
+                                        <span>3 answers</span>
+                                        <span>5 mins ago by <a href="#" class="text-decoration-none text-secondary fw-bold">kek123</a></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card question-card mb-4">
+                        <div class="card-body d-flex gap-3">
+                            <div class="d-flex flex-column align-items-center" style="min-width: 60px;">
+                                <img src="static/img/avatar2.jpg" class="rounded mb-2" style="width: 40px; height: 40px; background-color: #eee;" alt="Avatar">
+                                <button class="vote-btn vote-up-active" title="Upvote">&#9650;</button>
+                                <div class="vote-count vote-count-up">12</div>
+                                <button class="vote-btn" title="Downvote">&#9660;</button>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h4 class="question-title mb-1">
+                                    <a href="question.html">Best automatic mob farm layout for early game?</a>
+                                </h4>
+                                <p class="card-text text-secondary mb-2" style="font-size: 0.95rem;">
+                                    Looking for a simple volcano or pyramid trap design that doesn't require hardmode materials to build. Needs to handle blood moons.
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <a href="tag.html" class="badge px-2 py-1 text-decoration-none" style="background-color: #558265; color: white;">#farms</a>
+                                        <a href="tag.html" class="badge px-2 py-1 text-decoration-none" style="background-color: #4a5568; color: white;">#mechanics</a>
+                                    </div>
+                                    <div class="d-flex gap-3 text-muted" style="font-size: 0.85rem;">
+                                        <span>8 answers</span>
+                                        <span>2 hours ago by <a href="#" class="text-decoration-none text-secondary fw-bold">builder_pro</a></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card question-card mb-4">
+                        <div class="card-body d-flex gap-3">
+                            <div class="d-flex flex-column align-items-center" style="min-width: 60px;">
+                                <img src="static/img/avatar4.png" class="rounded mb-2" style="width: 40px; height: 40px; background-color: #eee;" alt="Avatar">
+                                <button class="vote-btn" title="Upvote">&#9650;</button>
+                                <div class="vote-count vote-count-down">-3</div>
+                                <button class="vote-btn vote-down-active" title="Downvote">&#9660;</button>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h4 class="question-title mb-1">
+                                    <a href="question.html">Is Minecraft better than Terraria?</a>
+                                </h4>
+                                <p class="card-text text-secondary mb-2" style="font-size: 0.95rem;">
+                                    I just started playing and it feels like 2D Minecraft but more confusing. Should I just go back to playing MC?
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <a href="tag.html" class="badge px-2 py-1 text-decoration-none" style="background-color: #718096; color: white;">#lore</a>
+                                    </div>
+                                    <div class="d-flex gap-3 text-muted" style="font-size: 0.85rem;">
+                                        <span>45 answers</span>
+                                        <span>1 day ago by <a href="#" class="text-decoration-none text-secondary fw-bold">lol1488</a></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <nav aria-label="Page navigation" class="mt-5 mb-3">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                        </li>
+                        <li class="page-item"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item active" aria-current="page">
+                            <a class="page-link" href="#">2</a>
+                        </li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">4</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+
+            </section>
+            
+            <aside class="col-12 col-lg-3">
+                <section class="mb-4">
+                    <div class="card sidebar-card">
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-3 fw-bold">Popular Topics</h5>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge px-2 py-1" style="background-color: #4a6fa5; color: white;"><a style="all:unset" href="tag.html">#modding</a></span>
+                                <span class="badge px-2 py-1" style="background-color: #b35d5d; color: white;"><a style="all:unset" href="tag.html">#boss-guides</a></span>
+                                <span class="badge px-2 py-1" style="background-color: #558265; color: white;"><a style="all:unset" href="tag.html">#farms</a></span>
+                                <span class="badge px-2 py-1" style="background-color: #c98a4b; color: white;"><a style="all:unset" href="tag.html">#hardmode</a></span>
+                            </div>            
+                        </div>            
+                    </div>
+                </section>
+                
+                <section>
+                    <div class="card sidebar-card">
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-3 fw-bold">Best Members</h5>
+                            <a class="d-flex align-items-center text-decoration-none text-secondary mb-2 hover-bg-light p-2 rounded member-item" href="#">
+                                <img src="static/img/avatar3.jpg" class="rounded me-3 member-avatar" style="width: 36px; height: 36px; background-color: #eee;" alt="Member">
+                                <span style="font-weight: 500; color: var(--text-main);">kek123</span>
+                            </a>
+                            <a class="d-flex align-items-center text-decoration-none text-secondary mb-2 hover-bg-light p-2 rounded member-item" href="#">
+                                <img src="static/img/avatar4.png" class="rounded me-3 member-avatar" style="width: 36px; height: 36px; background-color: #eee;" alt="Member">
+                                <span style="font-weight: 500; color: var(--text-main);">lol1488</span>
+                            </a>
+                        </div>            
+                    </div>
+                </section>
+            </aside>
+        </div>
+    </main>
+
+    <footer class="mt-auto py-4" style="background-color: var(--nav-bg); border-top: 1px solid var(--border-color);">
+        <div class="container text-center">
+            <span style="color: var(--text-muted); font-size: 0.9rem;">
+                &copy; 2026 TerraStack - VK EDU Web Project.
+            </span>
+        </div>
+    </footer>
+
+    <script src="static/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
