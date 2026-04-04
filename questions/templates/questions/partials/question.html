@@ -1,0 +1,29 @@
+<div class="card question-card mb-4">
+    <div class="card-body d-flex gap-3">
+        <div class="d-flex flex-column align-items-center" style="min-width: 60px;">
+            <img src="{{ question.user_avatar }}" class="rounded mb-2" style="width: 40px; height: 40px; background-color: #eee;" alt="Avatar">
+            <button class="vote-btn" title="Upvote">&#9650;</button>
+            <div class="vote-count">{{ question.vote_count }}</div>
+            <button class="vote-btn" title="Downvote">&#9660;</button>
+        </div>
+
+        <div class="flex-grow-1">
+            <h4 class="question-title mb-1">
+                <a href="question.hmtl">{{ question.title }}</a>
+            </h4>
+            <p class="card-text text-secondary mb-2" style="font-size: 0.95rem;">{{ question.text }}</p>
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+                <div class="d-flex flex-wrap gap-2">
+                    {% for tag in question.tags %}
+                    <a href="#" class="badge px-2 py-1 text-decoration-none" style="background-color: #b35d5d; color: white;">#{{ tag }}</a>
+                    {% endfor %}
+                </div>
+                <div class="d-flex gap-3 text-muted" style="font-size: 0.85rem;">
+                    <span>{{ question.answers }} answers</span>
+                    <span>5 mins ago by <a href="#" class="text-decoration-none text-secondary fw-bold">{{ question.user }}</a></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
