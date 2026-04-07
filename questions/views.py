@@ -69,7 +69,7 @@ class HomePageView(TemplateView):
         return context
 
 class HotPageView(TemplateView):
-    template_name = 'questions/index.html'
+    template_name = 'questions/hot.html'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

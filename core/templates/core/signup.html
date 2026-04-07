@@ -1,10 +1,8 @@
 {% extends "layout/base.html" %}
+{% load static %}
 {% block content %}
 <div class="d-flex align-items-center mb-4 pb-2 border-bottom">
     <h2 class="m-0 fw-bold" style="color: var(--text-main);">Registration</h2>
-</div>
-<div class="alert alert-danger mb-4 d-flex align-items-center" role="alert">
-    <div>Please fix the errors below to complete your registration.</div>
 </div>
 <div class="card border-0 shadow-sm rounded-3">
     <div class="card-body p-4 p-md-5">
@@ -18,7 +16,7 @@
             <div class="row mb-4 align-items-center">
                 <label for="regEmail" class="col-sm-3 col-form-label fw-bold" style="color: var(--text-main);">Email</label>
                 <div class="col-sm-9">
-                    <input type="email" class="form-control is-invalid" id="regEmail" value="dr.pepper@mail">
+                    <input type="email" class="form-control" id="regEmail" placeholder="dr.pepper@mail.com">
                     <div class="invalid-feedback">
                         Please enter a valid email address.
                     </div>
@@ -63,4 +61,5 @@
         </form>
     </div>
 </div>
+<script src="{% static 'core/js/signup.js' %}"></script>
 {% endblock %}
