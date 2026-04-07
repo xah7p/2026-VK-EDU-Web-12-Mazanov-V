@@ -1,8 +1,8 @@
 {% extends "layout/base.html" %}
 {% block content %}
 {% include "questions/partials/question_detail.html" %}
-<h4 class="mb-4" style="color: var(--text-main);">{{ question.answers }} Answers</h4>
-{% for answer in answers %}
+<h4 class="mb-4" style="color: var(--text-main);">{{ question.answers_count }} Answers</h4>
+{% for answer in question.answers %}
 {% include "questions/partials/answer.html" %}
 {% endfor %}
 <div class="mt-5 mb-4 p-4 rounded" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">

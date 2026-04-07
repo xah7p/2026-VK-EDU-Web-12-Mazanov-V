@@ -4,22 +4,6 @@ from django.shortcuts import render
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.views.generic import TemplateView
 
-QUESTIONS = [
-    {
-        'id': i,
-        'title': f"Title {i}",
-        'text': f"Text {i}",
-        'user': f"user{i}",
-        'user_avatar': '/static/default_user_avatar.png',
-        'tags': [f"tag{i}", f"tag{i + 1}"],
-        'vote_count': 5,
-        'viewed': i,
-        'answers': 3,
-        'posting_time': '10 mins',
-    }
-    for i in range(30)
-]
-
 ANSWERS = [
     {
         'accepted': i == 0,
@@ -31,6 +15,24 @@ ANSWERS = [
     }
     for i in range(30)
 ]
+
+QUESTIONS = [
+    {
+        'id': i,
+        'title': f"Title {i}",
+        'text': f"Text {i}",
+        'user': f"user{i}",
+        'user_avatar': '/static/default_user_avatar.png',
+        'tags': [f"tag{i}", f"tag{i + 1}"],
+        'vote_count': 5,
+        'viewed': i,
+        'answers': ANSWERS,
+        'answers_count': len(ANSWERS),
+        'posting_time': '10 mins',
+    }
+    for i in range(30)
+]
+
 
 BEST_MEMBERS = [
     {
@@ -111,7 +113,6 @@ class QuestionPageView(TemplateView):
         except ValueError:
             question_id = 1
         context['question'] = QUESTIONS[question_id]
-        context['answers'] = ANSWERS 
         context['best_members'] = BEST_MEMBERS
         context['popular_tags'] = POPULAR_TAGS
         return context
