@@ -3,25 +3,37 @@
 <div class="d-flex align-items-center mb-4 pb-2 border-bottom">
     <h2 class="m-0 fw-bold" style="color: var(--text-main);">Log In</h2>
 </div>
+{% if form.non_field_errors %}
 <div class="alert alert-danger mb-4 d-flex align-items-center" role="alert">
-    <div>Invalid login or password. Please try again.</div>
+    <div>{{ form.non_field_errors|striptags }}</div>
 </div>
+{% endif %}
 
 <div class="card border-0 shadow-sm rounded-3">
     <div class="card-body p-4 p-md-5">
-        
-        <form>
+        <form method="post" action="">
+            {% csrf_token %}
+            {% if safe_next %}
+            <input type="hidden" name="next" value="{{ safe_next }}">
+            {% endif %}
+
             <div class="row mb-4 align-items-center">
-                <label for="loginUsername" class="col-sm-3 col-form-label fw-bold" style="color: var(--text-main);">Login</label>
+                <label for="{{ form.username.id_for_label }}" class="col-sm-3 col-form-label fw-bold" style="color: var(--text-main);">Login</label>
                 <div class="col-sm-9">
-                    <input type="text" class="form-control is-invalid" id="loginUsername" value="dr_pepper" placeholder="Enter your login">
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                    <div class="invalid-feedback d-block">{{ form.username.errors|striptags }}</div>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="row mb-5 align-items-center">
-                <label for="loginPassword" class="col-sm-3 col-form-label fw-bold" style="color: var(--text-main);">Password</label>
+                <label for="{{ form.password.id_for_label }}" class="col-sm-3 col-form-label fw-bold" style="color: var(--text-main);">Password</label>
                 <div class="col-sm-9">
-                    <input type="password" class="form-control is-invalid" id="loginPassword" value="wrongpassword123" placeholder="Enter your password">
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                    <div class="invalid-feedback d-block">{{ form.password.errors|striptags }}</div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -29,10 +41,9 @@
                 <div class="col-sm-3"></div>
                 <div class="col-sm-9 d-flex align-items-center gap-4">
                     <button type="submit" class="btn btn-ask fw-bold px-4 py-2">Log in!</button>
-                    <a href={% url "core:signup" %} class="text-decoration-none" style="color: var(--accent-primary);">Create a new account</a>
+                    <a href="{% url 'core:signup' %}" class="text-decoration-none" style="color: var(--accent-primary);">Create a new account</a>
                 </div>
             </div>
-
         </form>
     </div>
 </div>

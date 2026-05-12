@@ -12,14 +12,31 @@
 {% endif %}
 <div class="mt-5 mb-4 p-4 rounded" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
     <h5 class="mb-3" style="color: var(--text-main); font-weight: 700;">Your Answer</h5>
-    <form>
+    {% if user.is_authenticated %}
+    <form method="post" action="">
+        {% csrf_token %}
+        {% if answer_form.non_field_errors %}
+        <div class="alert alert-danger mb-3">{{ answer_form.non_field_errors|striptags }}</div>
+        {% endif %}
         <div class="form-group mb-3">
-            <textarea class="form-control" rows="6" placeholder="Write your answer here..." style="resize: vertical;"></textarea>
+            {{ answer_form.text }}
+            {% if answer_form.text.errors %}
+            <div class="invalid-feedback d-block">{{ answer_form.text.errors|striptags }}</div>
+            {% endif %}
             <small class="form-text text-muted mt-2 d-block">
                 Formatting is supported. Maximum length is 10,000 characters.
             </small>
         </div>
         <button type="submit" class="btn btn-ask fw-bold px-4 py-2 mt-2">Post Your Answer</button>
     </form>
+    {% else %}
+    <div class="form-group mb-3" title="Log in to post an answer">
+        <textarea class="form-control" rows="6" placeholder="Write your answer here..." style="resize: vertical;" disabled aria-disabled="true"></textarea>
+        <small class="form-text text-muted mt-2 d-block">
+            Formatting is supported. Maximum length is 10,000 characters.
+        </small>
+    </div>
+    <button type="button" class="btn btn-ask fw-bold px-4 py-2 mt-2" disabled title="Log in to post an answer">Post Your Answer</button>
+    {% endif %}
 </div>
 {% endblock %}
