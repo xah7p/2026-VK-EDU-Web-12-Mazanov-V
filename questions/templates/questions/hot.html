@@ -1,0 +1,14 @@
+{% extends "layout/base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+    <h3 class="m-0" style="color: var(--text-main); font-weight: 700;">Hot Questions</h3>
+    <a href="{% url "questions:index" %}" class="text-decoration-none" style="color: var(--accent-primary); font-weight: 500;">New Questions -></a>
+</div>
+
+<div class="question-list">
+    {% for question in questions %}
+        {% include "questions/partials/question_preview.html" %}
+    {% endfor %}
+</div>
+{% include "questions/partials/pagination.html" %}
+{% endblock %}

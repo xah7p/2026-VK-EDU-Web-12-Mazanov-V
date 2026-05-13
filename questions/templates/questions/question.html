@@ -1,0 +1,20 @@
+{% extends "layout/base.html" %}
+{% block content %}
+{% include "questions/partials/question_detail.html" %}
+<h4 class="mb-4" style="color: var(--text-main);">{{ question.answers_count }} Answers</h4>
+{% for answer in question.answers %}
+{% include "questions/partials/answer.html" %}
+{% endfor %}
+<div class="mt-5 mb-4 p-4 rounded" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+    <h5 class="mb-3" style="color: var(--text-main); font-weight: 700;">Your Answer</h5>
+    <form>
+        <div class="form-group mb-3">
+            <textarea class="form-control" rows="6" placeholder="Write your answer here..." style="resize: vertical;"></textarea>
+            <small class="form-text text-muted mt-2 d-block">
+                Formatting is supported. Maximum length is 10,000 characters.
+            </small>
+        </div>
+        <button type="submit" class="btn btn-ask fw-bold px-4 py-2 mt-2">Post Your Answer</button>
+    </form>
+</div>
+{% endblock  %}

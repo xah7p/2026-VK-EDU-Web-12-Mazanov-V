@@ -1,0 +1,9 @@
+<div class="vote-vertical">
+    <button class="vote-btn" title="Like">&#9650;</button>
+    {% if object.vote_count >= 0 %}
+        <div class="vote-count" style="color: #2b9a79;">{{ object.vote_count }}</div>
+    {% else %}
+        <div class="vote-count" style="color: #e90c0c;">{{ object.vote_count }}</div>
+    {% endif %}
+    <button class="vote-btn" title="Dislike">&#9660;</button>
+</div>

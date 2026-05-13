@@ -1,0 +1,48 @@
+{% extends "layout/base.html" %}
+{% block content %}
+<div class="d-flex align-items-center mb-4 pb-2 border-bottom">
+    <h2 class="m-0 fw-bold text-main">Settings: xah7p</h2>
+</div>
+<div class="card border-0 shadow-sm rounded-3">
+    <div class="card-body p-4 p-md-5">
+        <form>
+            <div class="row mb-4 align-items-center">
+                <label for="profileLogin" class="col-sm-3 col-form-label fw-bold" style="color: var(--text-main);">Login</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control bg-light text-muted" id="profileLogin" value="xah7p" readonly>
+                    <small class="text-muted">Your login cannot be changed.</small>
+                </div>
+            </div>
+            <div class="row mb-4 align-items-center">
+                <label for="profileEmail" class="col-sm-3 col-form-label fw-bold" style="color: var(--text-main);">Email</label>
+                <div class="col-sm-9">
+                    <input type="email" class="form-control" id="profileEmail" value="xah7p@example.com">
+                </div>
+            </div>
+            <div class="row mb-4 align-items-center">
+                <label for="profileNickname" class="col-sm-3 col-form-label fw-bold" style="color: var(--text-main);">NickName</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" id="profileNickname" value="Xah">
+                </div>
+            </div>
+            <div class="row mb-5">
+                <label class="col-sm-3 col-form-label fw-bold" style="color: var(--text-main);">Upload avatar</label>
+                <div class="col-sm-9">
+                    <div class="d-flex flex-column gap-3 align-items-start">
+                        <div class="border rounded d-flex align-items-center justify-content-center bg-light overflow-hidden shadow-sm" style="width: 120px; height: 120px;">
+                            <img src="static/img/avatar1.jpeg" alt="Current Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <input class="form-control" type="file" id="profileAvatar">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3"></div>
+                <div class="col-sm-9">
+                    <button type="submit" class="btn btn-ask fw-bold px-5 py-2">Save</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
