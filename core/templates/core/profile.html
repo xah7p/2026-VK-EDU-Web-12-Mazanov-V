@@ -11,7 +11,7 @@
 {% endif %}
 <div class="card border-0 shadow-sm rounded-3">
     <div class="card-body p-4 p-md-5">
-        <form method="post" action="" enctype="multipart/form-data">
+        <form method="post" action="" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
 
             <div class="row mb-4 align-items-center">
@@ -40,7 +40,11 @@
                 <div class="col-sm-9">
                     <div class="d-flex flex-column gap-3 align-items-start">
                         <div class="border rounded d-flex align-items-center justify-content-center bg-light overflow-hidden shadow-sm" style="width: 120px; height: 120px;">
-                            <img src="{% avatar_url user %}" alt="Current Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                            {% if profile_row.avatar %}
+                            <img id="js-avatar-preview" src="{{ profile_row.avatar.url }}" data-initial-src="{{ profile_row.avatar.url }}" alt="Аватар" style="width: 100%; height: 100%; object-fit: cover;">
+                            {% else %}
+                            <img id="js-avatar-preview" src="{% avatar_url user %}" data-initial-src="{% avatar_url user %}" alt="Аватар" style="width: 100%; height: 100%; object-fit: cover;">
+                            {% endif %}
                         </div>
                         {{ form.avatar }}
                         {% if form.avatar.errors %}<div class="invalid-feedback d-block">{{ form.avatar.errors|striptags }}</div>{% endif %}
@@ -56,4 +60,5 @@
         </form>
     </div>
 </div>
+<script src="{% static 'js/profile_avatar_preview.js' %}"></script>
 {% endblock %}

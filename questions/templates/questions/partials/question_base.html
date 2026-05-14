@@ -3,7 +3,8 @@
     <div class="card-body d-flex gap-3">
         <div class="d-flex flex-column align-items-center" style="min-width: 60px;">
             <img src="{% avatar_url question.author %}" class="rounded mb-2" style="width: 40px; height: 40px; background-color: #eee;" alt="Avatar">
-            {% include "questions/partials/vote_count.html" with object=question %}
+            {% url "questions:question_vote" question_id=question.pk as question_vote_url %}
+            {% include "questions/partials/vote_count.html" with object=question vote_submit_url=question_vote_url user_vote=question.user_vote %}
         </div>
 
         <div class="flex-grow-1">

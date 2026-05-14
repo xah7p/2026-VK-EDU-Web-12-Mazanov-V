@@ -10,6 +10,9 @@
 {% else %}
     <p class="text-muted">Пока нет ни одного ответа к этому вопросу.</p>
 {% endif %}
+{% if user_is_question_author %}
+<div id="mark-correct-endpoint" class="d-none" data-url="{% url 'questions:mark_correct' question_id=question.pk %}"></div>
+{% endif %}
 <div class="mt-5 mb-4 p-4 rounded" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
     <h5 class="mb-3" style="color: var(--text-main); font-weight: 700;">Your Answer</h5>
     {% if user.is_authenticated %}
@@ -30,13 +33,16 @@
         <button type="submit" class="btn btn-ask fw-bold px-4 py-2 mt-2">Post Your Answer</button>
     </form>
     {% else %}
-    <div class="form-group mb-3" title="Log in to post an answer">
-        <textarea class="form-control" rows="6" placeholder="Write your answer here..." style="resize: vertical;" disabled aria-disabled="true"></textarea>
+    <p class="text-muted mb-3">
+        <a href="{% url 'core:login' %}?next={{ request.get_full_path|urlencode }}">Войдите</a>, чтобы оставить ответ на этот вопрос.
+    </p>
+    <div class="form-group mb-3">
+        <textarea class="form-control" rows="6" placeholder="Write your answer here..." style="resize: vertical;" readonly aria-readonly="true"></textarea>
         <small class="form-text text-muted mt-2 d-block">
             Formatting is supported. Maximum length is 10,000 characters.
         </small>
     </div>
-    <button type="button" class="btn btn-ask fw-bold px-4 py-2 mt-2" disabled title="Log in to post an answer">Post Your Answer</button>
+    <a href="{% url 'core:login' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-ask fw-bold px-4 py-2 mt-2" title="Войдите, чтобы отправить ответ">Post Your Answer</a>
     {% endif %}
 </div>
 {% endblock %}

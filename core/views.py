@@ -3,12 +3,15 @@ from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.contrib.auth.views import redirect_to_login
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.decorators.http import require_POST
 from django.views.generic import FormView
 
 from questions.context import get_sidebar_context
 
 from .forms import LoginForm, ProfileEditForm, SignUpForm
+from .models import Profile
 from .utils import safe_redirect_url
 
 
@@ -58,6 +61,14 @@ class ProfilePageView(SidebarMixin, FormView):
             return redirect_to_login(request.get_full_path())
         return super().dispatch(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["profile_row"], _ = Profile.objects.get_or_create(
+            user=self.request.user,
+            defaults={"nickname": ""},
+        )
+        return context
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
@@ -65,13 +76,15 @@ class ProfilePageView(SidebarMixin, FormView):
 
     def form_valid(self, form):
         form.save()
+        self.request.user.refresh_from_db(fields=["username", "email"])
         return redirect(self.success_url)
 
 
-@require_POST
-def logout_view(request):
-    next_raw = request.POST.get("next") or "/"
-    safe = safe_redirect_url(request, next_raw)
-    target = safe or reverse("questions:index")
-    logout(request)
-    return redirect(target)
+@method_decorator(require_POST, name="dispatch")
+class LogoutView(View):
+    def post(self, request):
+        next_raw = request.POST.get("next") or "/"
+        safe = safe_redirect_url(request, next_raw)
+        target = safe or reverse("questions:index")
+        logout(request)
+        return redirect(target)

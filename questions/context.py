@@ -1,10 +1,11 @@
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.db.models import Count
+from django.templatetags.static import static
 
 User = get_user_model()
 
-DEFAULT_AVATAR = "/static/default_user_avatar.png"
+DEFAULT_AVATAR = static("default_user_avatar.png")
 
 
 def get_sidebar_context(limit_tags=12, limit_members=5):

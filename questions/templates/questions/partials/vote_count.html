@@ -1,19 +1,41 @@
-<div class="vote-vertical">
+<div class="vote-vertical js-vote-block"
+    data-vote-url="{{ vote_submit_url|default:'' }}"
+    data-login-url="{% url 'core:login' %}?next={{ request.get_full_path|urlencode }}"
+    data-user-vote="{% if user_vote == 1 %}1{% elif user_vote == -1 %}-1{% else %}0{% endif %}"
+>
     {% if user.is_authenticated %}
-    <button type="button" class="vote-btn" title="Like">&#9650;</button>
+    <button
+        type="button"
+        class="vote-btn vote-btn-up js-vote-up{% if user_vote == 1 %} vote-up-active{% endif %}"
+        title="Like"
+        {% if user_vote == 1 %}disabled aria-pressed="true"{% endif %}
+    >&#9650;</button>
     {% else %}
-    <button type="button" class="vote-btn" title="Log in to like" disabled style="pointer-events: none;">&#9650;</button>
+    <a
+        class="vote-btn vote-btn-up text-decoration-none d-inline-flex align-items-center justify-content-center"
+        href="{% url 'core:login' %}?next={{ request.get_full_path|urlencode }}"
+        title="Войдите, чтобы поставить лайк"
+    >&#9650;</a>
     {% endif %}
     {% with vc=object.vote_count|default:0 %}
     {% if vc >= 0 %}
-        <div class="vote-count" style="color: #2b9a79;">{{ vc }}</div>
+        <div class="vote-count js-vote-count vote-count-up" style="color: #2b9a79;">{{ vc }}</div>
     {% else %}
-        <div class="vote-count" style="color: #e90c0c;">{{ vc }}</div>
+        <div class="vote-count js-vote-count vote-count-down" style="color: #e90c0c;">{{ vc }}</div>
     {% endif %}
     {% endwith %}
     {% if user.is_authenticated %}
-    <button type="button" class="vote-btn" title="Dislike">&#9660;</button>
+    <button
+        type="button"
+        class="vote-btn vote-btn-down js-vote-down{% if user_vote == -1 %} vote-down-active{% endif %}"
+        title="Dislike"
+        {% if user_vote == -1 %}disabled aria-pressed="true"{% endif %}
+    >&#9660;</button>
     {% else %}
-    <button type="button" class="vote-btn" title="Log in to dislike" disabled style="pointer-events: none;">&#9660;</button>
+    <a
+        class="vote-btn vote-btn-down text-decoration-none d-inline-flex align-items-center justify-content-center"
+        href="{% url 'core:login' %}?next={{ request.get_full_path|urlencode }}"
+        title="Войдите, чтобы поставить дизлайк"
+    >&#9660;</a>
     {% endif %}
 </div>

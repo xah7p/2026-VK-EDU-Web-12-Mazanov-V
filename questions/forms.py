@@ -7,6 +7,59 @@ from django.db import transaction
 from .models import Answer, Question, QuestionTag, Tag
 
 
+VOTE_LIKE = "like"
+VOTE_DISLIKE = "dislike"
+
+
+class QuestionVoteForm(forms.Form):
+    question_id = forms.IntegerField(min_value=1)
+    vote_type = forms.ChoiceField(choices=[(VOTE_LIKE, "like"), (VOTE_DISLIKE, "dislike")])
+
+    def clean_question_id(self):
+        qid = self.cleaned_data["question_id"]
+        if not Question.objects.filter(pk=qid).exists():
+            raise ValidationError("Вопрос не найден.")
+        return qid
+
+    def vote_value(self) -> int:
+        return 1 if self.cleaned_data["vote_type"] == VOTE_LIKE else -1
+
+
+class AnswerVoteForm(forms.Form):
+    answer_id = forms.IntegerField(min_value=1)
+    vote_type = forms.ChoiceField(choices=[(VOTE_LIKE, "like"), (VOTE_DISLIKE, "dislike")])
+
+    def clean_answer_id(self):
+        aid = self.cleaned_data["answer_id"]
+        if not Answer.objects.filter(pk=aid).exists():
+            raise ValidationError("Ответ не найден.")
+        return aid
+
+    def vote_value(self) -> int:
+        return 1 if self.cleaned_data["vote_type"] == VOTE_LIKE else -1
+
+
+class MarkCorrectAnswerForm(forms.Form):
+    question_id = forms.IntegerField(min_value=1)
+    answer_id = forms.IntegerField(min_value=1)
+
+    def clean(self):
+        cleaned = super().clean()
+        qid = cleaned.get("question_id")
+        aid = cleaned.get("answer_id")
+        if qid is None or aid is None:
+            return cleaned
+        answer = Answer.objects.filter(pk=aid, question_id=qid).first()
+        if answer is None:
+            raise ValidationError("Ответ не найден или не относится к этому вопросу.")
+        self._answer = answer
+        return cleaned
+
+    @property
+    def answer(self):
+        return getattr(self, "_answer", None)
+
+
 class AskQuestionForm(forms.ModelForm):
     tags = forms.CharField(
         label="Теги",

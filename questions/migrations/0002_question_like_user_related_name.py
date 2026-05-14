@@ -1,5 +1,3 @@
-# Generated manually: Question.author related_name + QuestionLike.user related_name
-
 import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models

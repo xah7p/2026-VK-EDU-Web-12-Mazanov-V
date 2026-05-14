@@ -5,7 +5,8 @@
             <img src="{% avatar_url question.author %}" class="rounded shadow-sm mb-2 avatar-64" alt="Avatar">
             <span class="text-decoration-none fw-bold" style="color: var(--accent-primary); font-size: 0.95rem;">{% if question.author %}{{ question.author.get_username }}{% else %}deleted{% endif %}</span>
             <span class="text-muted mb-3" style="font-size: 0.75rem;">{{ question.created_at|timesince }} ago</span>
-            {% include "questions/partials/vote_count.html" with object=question %}
+            {% url "questions:question_vote" question_id=question.pk as question_vote_url %}
+            {% include "questions/partials/vote_count.html" with object=question vote_submit_url=question_vote_url user_vote=user_question_vote %}
         </div>
 
         <div class="flex-grow-1">

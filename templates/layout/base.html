@@ -37,9 +37,7 @@
                             </form>
                         </div>
                         {% else %}
-                        <span class="d-inline-block" title="Log in to ask a question">
-                            <button type="button" class="btn btn-ask fw-bold px-3" disabled style="pointer-events: none;">Ask Question</button>
-                        </span>
+                        <a href="{% url 'core:login' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-ask fw-bold px-3" title="Войдите, чтобы задать вопрос">Ask Question</a>
                         <div class="user-unauth d-flex flex-column flex-lg-row gap-2">
                             <a href="{% url 'core:login' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-outline-auth fw-bold px-3">Log in</a>
                             <a href="{% url 'core:signup' %}" class="btn btn-auth fw-bold px-3">Sign up</a>
@@ -96,6 +94,6 @@
         </div>
     </footer>
 
-    <script src="{% static "js/bootstrap.bundle.min.js" %}"></script>
-</body>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+    <script src="{% static "questions/js/votes.js" %}"></script>
 </html>

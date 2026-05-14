@@ -34,6 +34,14 @@ class Question(models.Model):
         blank=True,
         related_name="questions",
     )
+    correct_answer = models.ForeignKey(
+        "questions.Answer",
+        verbose_name="Правильный ответ",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="marked_correct_for_questions",
+    )
 
     class Meta: 
         verbose_name = "Вопрос"
@@ -112,6 +120,11 @@ class QuestionLike(models.Model):
         related_name="question_likes",
     )
     created_at = models.DateTimeField(verbose_name="Создан", auto_now_add=True)
+    value = models.SmallIntegerField(
+        verbose_name="Значение голоса",
+        default=1,
+        choices=[(1, "Лайк"), (-1, "Дизлайк")],
+    )
 
     class Meta:
         unique_together = [["user", "question"]]
@@ -138,6 +151,11 @@ class AnswerLike(models.Model):
         related_name="answer_likes",
     )
     created_at = models.DateTimeField(verbose_name="Создан", auto_now_add=True)
+    value = models.SmallIntegerField(
+        verbose_name="Значение голоса",
+        default=1,
+        choices=[(1, "Лайк"), (-1, "Дизлайк")],
+    )
 
     class Meta:
         unique_together = [["user", "answer"]]

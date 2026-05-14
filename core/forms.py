@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm
@@ -97,6 +99,14 @@ class SignUpForm(forms.Form):
         return user
 
 
+_AVATAR_CT_EXT = {
+    "image/jpeg": ".jpg",
+    "image/jpg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+}
+
+
 class ProfileEditForm(forms.Form):
     username = forms.CharField(
         label="Логин",
@@ -105,7 +115,13 @@ class ProfileEditForm(forms.Form):
     )
     email = forms.EmailField(
         label="Email",
-        widget=forms.EmailInput(attrs={"class": "form-control"}),
+        required=False,
+        widget=forms.EmailInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Необязательно",
+            }
+        ),
     )
     nickname = forms.CharField(
         label="Никнейм",
@@ -116,8 +132,33 @@ class ProfileEditForm(forms.Form):
     avatar = forms.ImageField(
         label="Аватар",
         required=False,
-        widget=forms.ClearableFileInput(attrs={"class": "form-control"}),
+        widget=forms.FileInput(
+            attrs={
+                "class": "form-control",
+                "accept": "image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp",
+            }
+        ),
     )
+
+    AVATAR_MAX_BYTES = 2 * 1024 * 1024
+    AVATAR_ALLOWED_EXT = {".jpg", ".jpeg", ".png", ".webp"}
+
+    def clean_avatar(self):
+        avatar = self.cleaned_data.get("avatar")
+        if not avatar or avatar is False:
+            return avatar
+        ext = Path(avatar.name).suffix.lower()
+        if not ext and getattr(avatar, "content_type", None):
+            ext = _AVATAR_CT_EXT.get(avatar.content_type, "")
+        if ext not in self.AVATAR_ALLOWED_EXT:
+            raise ValidationError(
+                "Допустимые форматы: JPEG, PNG, WebP."
+            )
+        if avatar.size > self.AVATAR_MAX_BYTES:
+            raise ValidationError(
+                "Размер файла не должен превышать 2 МБ."
+            )
+        return avatar
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
@@ -126,14 +167,16 @@ class ProfileEditForm(forms.Form):
             "initial",
             {
                 "username": user.username,
-                "email": user.email,
-                "nickname": self.profile.nickname,
+                "email": user.email or "",
+                "nickname": self.profile.nickname or "",
             },
         )
         super().__init__(*args, **kwargs)
 
     def clean_username(self):
-        username = self.cleaned_data["username"]
+        username = (self.cleaned_data.get("username") or "").strip()
+        if not username:
+            raise ValidationError("Укажите логин.")
         if (
             User.objects.exclude(pk=self.user.pk)
             .filter(username=username)
@@ -142,10 +185,16 @@ class ProfileEditForm(forms.Form):
             raise ValidationError("Этот логин уже занят.")
         return username
 
+    def clean_email(self):
+        raw = self.cleaned_data.get("email")
+        if raw is None or (isinstance(raw, str) and not raw.strip()):
+            return ""
+        return raw.strip()
+
     @transaction.atomic
     def save(self):
         self.user.username = self.cleaned_data["username"]
-        self.user.email = self.cleaned_data["email"]
+        self.user.email = (self.cleaned_data.get("email") or "").strip()
         self.user.save()
         self.profile.nickname = self.cleaned_data.get("nickname") or ""
         avatar = self.cleaned_data.get("avatar")
@@ -154,6 +203,8 @@ class ProfileEditForm(forms.Form):
                 self.profile.avatar.delete(save=False)
             self.profile.avatar = None
         elif avatar:
+            if self.profile.avatar:
+                self.profile.avatar.delete(save=False)
             self.profile.avatar = avatar
         self.profile.save()
         return self.user

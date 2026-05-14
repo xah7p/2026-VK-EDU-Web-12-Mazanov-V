@@ -1,6 +1,6 @@
 from django.urls import path
 
-from questions import views
+from questions import api_views, views
 
 app_name = "questions"
 
@@ -9,6 +9,21 @@ urlpatterns = [
     path("index", views.HomePageView.as_view(), name="index_alt"),
     path("ask/", views.AskPageView.as_view(), name="ask"),
     path("hot/", views.HotPageView.as_view(), name="hot"),
+    path(
+        "api/question/<int:question_id>/vote/",
+        api_views.QuestionVoteView.as_view(),
+        name="question_vote",
+    ),
+    path(
+        "api/answer/<int:answer_id>/vote/",
+        api_views.AnswerVoteView.as_view(),
+        name="answer_vote",
+    ),
+    path(
+        "api/question/<int:question_id>/correct/",
+        api_views.MarkCorrectAnswerView.as_view(),
+        name="mark_correct",
+    ),
     path(
         "question/<int:question_id>/",
         views.QuestionPageView.as_view(),

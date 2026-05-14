@@ -74,7 +74,7 @@ class Command(BaseCommand):
         n_q_likes = n_likes_total // 2
         n_a_likes = n_likes_total - n_q_likes
 
-        fake = Faker()
+        fake = Faker("ru_RU")
         Faker.seed(0)
         random.seed(0)
         pwd = make_password("password123")
@@ -159,7 +159,7 @@ class Command(BaseCommand):
                 )
             )
         q_likes = [
-            QuestionLike(user_id=u, question_id=q, created_at=now)
+            QuestionLike(user_id=u, question_id=q, created_at=now, value=1)
             for u, q in pairs_q
         ]
         batched_bulk_create(QuestionLike, q_likes)
@@ -174,7 +174,7 @@ class Command(BaseCommand):
                 )
             )
         a_likes = [
-            AnswerLike(user_id=u, answer_id=a, created_at=now)
+            AnswerLike(user_id=u, answer_id=a, created_at=now, value=1)
             for u, a in pairs_a
         ]
         batched_bulk_create(AnswerLike, a_likes)
