@@ -19,6 +19,8 @@ DEBUG = os.environ.get("DEBUG", "True").lower() in ("1", "true", "yes")
 _raw_hosts = os.environ.get("ALLOWED_HOSTS", "").strip()
 ALLOWED_HOSTS = [h.strip() for h in _raw_hosts.split(",") if h.strip()] if _raw_hosts else []
 
+ALLOWED_HOSTS += ['edu.localhost']
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -122,8 +124,10 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "static_collected"
 STATICFILES_DIRS = [
     BASE_DIR / "static",
+    BASE_DIR / "core" / "static",
     BASE_DIR / "questions" / "static",
 ]
 
