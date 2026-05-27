@@ -25,6 +25,11 @@ urlpatterns = [
         name="mark_correct",
     ),
     path(
+        "api/question/<int:question_id>/answer/<int:answer_id>/fragment/",
+        api_views.AnswerFragmentView.as_view(),
+        name="answer_fragment",
+    ),
+    path(
         "question/<int:question_id>/",
         views.QuestionPageView.as_view(),
         name="question",

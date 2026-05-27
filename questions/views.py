@@ -1,11 +1,15 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import redirect_to_login
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import FormView, TemplateView
+from django.conf import settings
 
 from questions.context import get_sidebar_context
 from questions.forms import AnswerForm, AskQuestionForm
 from questions.models import Answer, Question
+from questions.tasks import send_answer_to_centrifugo
+from questions.centrifugo_utils import get_centrifugo_token
 
 
 def _answer_page_number(question_id: int, answer_id: int, per_page: int = 10) -> int:
@@ -80,11 +84,23 @@ class QuestionPageView(SidebarMixin, TemplateView):
         if not request.user.is_authenticated:
             return redirect_to_login(request.get_full_path())
         form = AnswerForm(request.user, question, request.POST)
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
         if form.is_valid():
             answer = form.save()
-            page = _answer_page_number(question.pk, answer.pk)
-            url = f"{question.get_absolute_url()}?page={page}#answer-{answer.pk}"
-            return redirect(url)
+            send_answer_to_centrifugo.delay(answer.id)
+            if is_ajax:
+                return JsonResponse({"answer": {"answer_id": answer.id}})
+            form = AnswerForm(request.user, question)
+
+        if is_ajax:
+            errors = {}
+            if form.non_field_errors():
+                errors["__all__"] = [str(e) for e in form.non_field_errors()]
+            if "text" in form.errors:
+                errors["text"] = [str(e) for e in form.errors["text"]]
+            return JsonResponse({"errors": errors}, status=400)
+
         context = self.get_context_data(answer_form=form, **kwargs)
         return self.render_to_response(context)
 
@@ -103,4 +119,13 @@ class QuestionPageView(SidebarMixin, TemplateView):
             context["answer_form"] = AnswerForm(self.request.user, question)
         else:
             context["answer_form"] = None
+        
+        if self.request.user.is_authenticated:
+            context["centrifugo_token"] = get_centrifugo_token(self.request.user.id)
+        else:
+            context["centrifugo_token"] = None
+        context["question_id"] = self.kwargs["question_id"]
+
+        context["centrifugo_url"] = f"ws://{settings.CENTRIFUGO_HOST}:{settings.CENTRIFUGO_PORT}/connection/websocket"
+ 
         return context

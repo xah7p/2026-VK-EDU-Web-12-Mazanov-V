@@ -138,3 +138,32 @@ if DEBUG:
     DEBUG_TOOLBAR_CONFIG = {
         "SHOW_TOOLBAR_CALLBACK": _show_debug_toolbar,
     }
+    
+CENTRIFUGO_HOST = os.environ.get("CENTRIFUGO_HOST", "localhost")
+CENTRIFUGO_PORT = os.environ.get("CENTRIFUGO_PORT", "9000")
+CENTRIFUGO_API_KEY = os.environ.get("CENTRIFUGO_API_KEY", "17I-1zkkrLHHMeK_nOzCW7oxtYCGWvHJqXtsyIHKTkDrxBJblIK4vFsdJvyCBMGshh5z_Gk0Cu0yDBrdwYtiAA")
+CENTRIFUGO_TOKEN_KEY = os.environ.get("CENTRIFUGO_TOKEN_KEY", "vheAhEAv99bP68zPTexlGCl7cyIbHXgq_v-r_Sh7wUEKmXn6q3D6tm5A06ksFBjEG3NokcJ96KicBdpzBp9HFw")
+
+REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
+REDIS_PORT = os.environ.get("REDIS_PORT", "6379")
+REDIS_CACHE_DB = os.environ.get("REDIS_CACHE_DB", "1")
+REDIS_BROKER_DB = os.environ.get("REDIS_BROKER_DB", "2")
+REDIS_BEAT_DB = os.environ.get("REDIS_BEAT_DB", "3")
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_CACHE_DB}",
+        "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+        "TIMEOUT": 60 * 10,
+    }
+}
+
+CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_BROKER_DB}"
+CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_BEAT_DB}"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+
+CELERY_BEAT_SCHEDULER = "redbeat.RedBeatScheduler"
+CELERY_REDBEAT_REDIS_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_BEAT_DB}"

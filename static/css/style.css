@@ -200,15 +200,33 @@ body {
     box-shadow: var(--shadow-sm);
 }
 
+.question-card .flex-grow-1,
+.js-answer-card .flex-grow-1 {
+    min-width: 0;
+}
+
 .question-title {
     font-size: 1.25rem;
     font-weight: 700;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .question-title a {
     color: var(--text-main);
     text-decoration: none;
     transition: color 0.2s;
+}
+
+.question-card .card-text,
+.js-answer-card .card-text {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.question-card .card-body,
+.js-answer-card .card-body {
+    overflow: hidden;
 }
 
 .question-title a:hover {

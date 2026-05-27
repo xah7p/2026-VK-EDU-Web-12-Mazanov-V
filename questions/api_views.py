@@ -1,10 +1,11 @@
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
 from django.views import View
 
 from questions.forms import AnswerVoteForm, MarkCorrectAnswerForm, QuestionVoteForm
-from questions.models import AnswerLike, Question, QuestionLike
+from questions.models import Answer, AnswerLike, Question, QuestionLike
 
 
 def json_error(message: str, code: str, status: int = 400):
@@ -88,6 +89,42 @@ class AnswerVoteView(JsonPostApiView):
                 "your_vote": your_vote,
             }
         )
+
+
+class AnswerFragmentView(View):
+    def get(self, request, question_id: int, answer_id: int):
+        question = get_object_or_404(Question, pk=question_id)
+        answer = get_object_or_404(
+            Answer.objects.for_question(question_id),
+            pk=answer_id,
+        )
+
+        answer_votes = {}
+        user_is_question_author = False
+        if request.user.is_authenticated:
+            user_is_question_author = question.author_id == request.user.id
+            vote = (
+                AnswerLike.objects.filter(
+                    user_id=request.user.id,
+                    answer_id=answer_id,
+                )
+                .values_list("value", flat=True)
+                .first()
+            )
+            if vote is not None:
+                answer_votes[answer_id] = vote
+
+        html = render_to_string(
+            "questions/partials/answer.html",
+            {
+                "question": question,
+                "answer": answer,
+                "answer_votes": answer_votes,
+                "user_is_question_author": user_is_question_author,
+            },
+            request=request,
+        )
+        return HttpResponse(html)
 
 
 class MarkCorrectAnswerView(JsonPostApiView):
