@@ -1,5 +1,7 @@
 from django.db import models
 from django.urls import reverse
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVector
 
 from .managers import (
     AnswerLikeManager,
@@ -46,6 +48,13 @@ class Question(models.Model):
     class Meta: 
         verbose_name = "Вопрос"
         verbose_name_plural = "Вопросы"
+        indexes = [
+            GinIndex(
+                SearchVector("title", weight="A", config="simple")
+                + SearchVector("text", weight="B", config="simple"),
+                name="question_search_gin_idx",
+            ),
+        ]
     
     def __str__(self):
         return f"Вопрос #{self.id}: {self.title}"

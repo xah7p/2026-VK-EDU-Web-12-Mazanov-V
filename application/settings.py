@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
+    "django.contrib.postgres",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
@@ -167,3 +168,22 @@ CELERY_RESULT_SERIALIZER = "json"
 
 CELERY_BEAT_SCHEDULER = "redbeat.RedBeatScheduler"
 CELERY_REDBEAT_REDIS_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_BEAT_DB}"
+
+CELERY_BEAT_SCHEDULE = {
+    "recalc-popular-tags-every-hour": {
+        "task": "questions.tasks.recalculate_popular_tags_cache",
+        "schedule": 60 * 60,
+        "args": (10,),
+    },
+    "recalc-best-members-every-15-min": {
+        "task": "questions.tasks.recalculate_best_members_cache",
+        "schedule": 15 * 60,
+        "args": (10,),
+    }
+}
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "maildev")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "1025"))
+EMAIL_USE_TLS =  os.environ.get("EMAIL_USE_TLS", "False").lower() in ("1", "true", "yes")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@local.dev")

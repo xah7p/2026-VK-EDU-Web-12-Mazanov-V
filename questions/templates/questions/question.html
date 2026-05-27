@@ -59,7 +59,11 @@
   const seenAnswers = new Set();
 
   function showAnswer(answerId) {
-    if (currentPage !== 1 || !answerId) return;
+    if (!answerId) return;
+    if (currentPage !== 1) {
+      alert('Появился новый ответ. Обновите страницу, чтобы увидеть его.');
+      return;
+    }
     if (seenAnswers.has(answerId) || document.getElementById('answer-' + answerId)) return;
     seenAnswers.add(answerId);
 

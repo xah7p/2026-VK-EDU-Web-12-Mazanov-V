@@ -3,6 +3,8 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.views import View
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
+import re
 
 from questions.forms import AnswerVoteForm, MarkCorrectAnswerForm, QuestionVoteForm
 from questions.models import Answer, AnswerLike, Question, QuestionLike
@@ -159,3 +161,29 @@ class MarkCorrectAnswerView(JsonPostApiView):
                 "correct_answer_id": answer.pk,
             }
         )
+
+class QuestionSearchSuggestView(View):
+    def get(self, request):
+        q = (request.GET.get("q") or "").strip()
+        if len(q) < 2:
+            return JsonResponse({"ok": True, "items": []})
+
+        terms = [t for t in re.split(r"\s+", q.lower()) if t]
+        if not terms:
+            return JsonResponse({"ok": True, "items": []})
+        raw_query = " & ".join(f"{term}:*" for term in terms)
+
+        vector = SearchVector("title", weight="A", config="simple") + SearchVector("text", weight="B", config="simple")
+        query = SearchQuery(raw_query, search_type="raw", config="simple")
+
+        qs = (
+            Question.objects.annotate(rank=SearchRank(vector, query))
+            .filter(rank__gt=0)
+            .order_by("-rank", "-created_at")[:7]
+        )
+
+        items = [
+            {"id": obj.id, "title": obj.title, "url": obj.get_absolute_url()}
+            for obj in qs
+        ]
+        return JsonResponse({"ok": True, "items": items})

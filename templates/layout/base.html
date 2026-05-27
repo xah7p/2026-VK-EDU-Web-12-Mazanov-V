@@ -20,9 +20,10 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarContent">
-                    <form class="d-flex mx-auto my-3 my-lg-0 w-100" role="search" style="max-width: 450px;">
-                        <input class="form-control form-control-search shadow-none" type="search" placeholder="Search topics..." aria-label="Search"/>
+                    <form id="search-form" class="d-flex mx-auto my-3 my-lg-0 w-100 position-relative" role="search" style="max-width: 450px;">
+                        <input id="search-input" name="q" class="form-control form-control-search shadow-none" type="search" placeholder="Search topics..." aria-label="Search" autocomplete="off"/>
                         <button class="btn btn-search text-white fw-bold" style="border-radius: 0 8px 8px 0;" type="submit">Search</button>
+                        <div id="search-suggest" class="list-group position-absolute w-100 shadow-sm" style="top: 100%; left: 0; z-index: 1050; display: none;"></div>
                     </form>
 
                     <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-3 ms-lg-4">
@@ -97,5 +98,6 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'questions/js/votes.js' %}"></script>
+    <script src="{% static 'questions/js/search_suggest.js' %}"></script>
 </body>
 </html>

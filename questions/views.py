@@ -8,7 +8,7 @@ from django.conf import settings
 from questions.context import get_sidebar_context
 from questions.forms import AnswerForm, AskQuestionForm
 from questions.models import Answer, Question
-from questions.tasks import send_answer_to_centrifugo
+from questions.tasks import send_answer_to_centrifugo, send_new_answer_email
 from questions.centrifugo_utils import get_centrifugo_token
 
 
@@ -89,6 +89,7 @@ class QuestionPageView(SidebarMixin, TemplateView):
         if form.is_valid():
             answer = form.save()
             send_answer_to_centrifugo.delay(answer.id)
+            send_new_answer_email.delay(answer.id)
             if is_ajax:
                 return JsonResponse({"answer": {"answer_id": answer.id}})
             form = AnswerForm(request.user, question)
@@ -129,3 +130,4 @@ class QuestionPageView(SidebarMixin, TemplateView):
         context["centrifugo_url"] = f"ws://{settings.CENTRIFUGO_HOST}:{settings.CENTRIFUGO_PORT}/connection/websocket"
  
         return context
+

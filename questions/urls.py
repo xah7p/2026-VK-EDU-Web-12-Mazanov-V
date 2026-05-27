@@ -35,4 +35,5 @@ urlpatterns = [
         name="question",
     ),
     path("tag/<str:tag_name>/", views.TagPageView.as_view(), name="tag"),
+    path("api/search/suggest/", api_views.QuestionSearchSuggestView.as_view(), name="search_suggest")
 ]
