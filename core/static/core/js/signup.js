@@ -1,4 +1,4 @@
-const emailInput = document.getElementById('regEmail');
+const emailInput = document.getElementById('id_email');
 
 if (emailInput) {
     emailInput.addEventListener('input', function() {

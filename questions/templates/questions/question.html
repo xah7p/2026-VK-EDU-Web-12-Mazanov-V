@@ -1,20 +1,148 @@
 {% extends "layout/base.html" %}
+{% load static %}
 {% block content %}
 {% include "questions/partials/question_detail.html" %}
-<h4 class="mb-4" style="color: var(--text-main);">{{ question.answers_count }} Answers</h4>
-{% for answer in question.answers %}
-{% include "questions/partials/answer.html" %}
-{% endfor %}
+<h4 id="answers-heading" class="mb-4" style="color: var(--text-main);">{{ question.answers_count }} Answers</h4>
+<div id="answers-list">
+{% if answers %}
+    {% for answer in answers %}
+        {% include "questions/partials/answer.html" %}
+    {% endfor %}
+{% else %}
+    <p id="answers-empty" class="text-muted">Пока нет ни одного ответа к этому вопросу.</p>
+{% endif %}
+</div>
+{% if answers %}
+    {% include "questions/partials/pagination.html" %}
+{% endif %}
+{% if user_is_question_author %}
+<div id="mark-correct-endpoint" class="d-none" data-url="{% url 'questions:mark_correct' question_id=question.pk %}"></div>
+{% endif %}
 <div class="mt-5 mb-4 p-4 rounded" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
     <h5 class="mb-3" style="color: var(--text-main); font-weight: 700;">Your Answer</h5>
-    <form>
+    {% if user.is_authenticated %}
+    <form id="answer-form" method="post" action="">
+        {% csrf_token %}
+        {% if answer_form.non_field_errors %}
+        <div class="alert alert-danger mb-3">{{ answer_form.non_field_errors|striptags }}</div>
+        {% endif %}
         <div class="form-group mb-3">
-            <textarea class="form-control" rows="6" placeholder="Write your answer here..." style="resize: vertical;"></textarea>
+            {{ answer_form.text }}
+            {% if answer_form.text.errors %}
+            <div class="invalid-feedback d-block">{{ answer_form.text.errors|striptags }}</div>
+            {% endif %}
             <small class="form-text text-muted mt-2 d-block">
                 Formatting is supported. Maximum length is 10,000 characters.
             </small>
         </div>
         <button type="submit" class="btn btn-ask fw-bold px-4 py-2 mt-2">Post Your Answer</button>
     </form>
+    {% else %}
+    <p class="text-muted mb-3">
+        <a href="{% url 'core:login' %}?next={{ request.get_full_path|urlencode }}">Войдите</a>, чтобы оставить ответ на этот вопрос.
+    </p>
+    <div class="form-group mb-3">
+        <textarea class="form-control" rows="6" placeholder="Write your answer here..." style="resize: vertical;" readonly aria-readonly="true"></textarea>
+        <small class="form-text text-muted mt-2 d-block">
+            Formatting is supported. Maximum length is 10,000 characters.
+        </small>
+    </div>
+    <a href="{% url 'core:login' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-ask fw-bold px-4 py-2 mt-2" title="Войдите, чтобы отправить ответ">Post Your Answer</a>
+    {% endif %}
 </div>
-{% endblock  %}
+
+<script src="https://unpkg.com/centrifuge@5.4.0/dist/centrifuge.js"></script>
+<script type="text/javascript">
+  const answersList = document.getElementById('answers-list');
+  const currentPage = {{ page_obj.number|default:1 }};
+  const fragmentUrl = "{% url 'questions:answer_fragment' question_id=question.pk answer_id=0 %}";
+  const seenAnswers = new Set();
+
+  function showAnswer(answerId) {
+    if (!answerId) return;
+    if (currentPage !== 1) {
+      alert('Появился новый ответ. Обновите страницу, чтобы увидеть его.');
+      return;
+    }
+    if (seenAnswers.has(answerId) || document.getElementById('answer-' + answerId)) return;
+    seenAnswers.add(answerId);
+
+    fetch(fragmentUrl.replace('/0/fragment/', '/' + answerId + '/fragment/'))
+      .then(function (r) { return r.ok ? r.text() : Promise.reject(r.status); })
+      .then(function (html) {
+        if (document.getElementById('answer-' + answerId)) return;
+        var empty = document.getElementById('answers-empty');
+        if (empty) empty.remove();
+        answersList.insertAdjacentHTML('afterbegin', html);
+        var heading = document.getElementById('answers-heading');
+        var match = heading && heading.textContent.match(/(\d+)/);
+        if (heading && match) heading.textContent = (+match[1] + 1) + ' Answers';
+      })
+      .catch(function (e) {
+        seenAnswers.delete(answerId);
+        console.error('answer fragment error', e);
+      });
+  }
+
+  {% if centrifugo_token %}
+  const centrifuge = new Centrifuge("{{ centrifugo_url|escapejs }}", {
+    token: "{{ centrifugo_token|escapejs }}"
+  });
+  {% else %}
+  const centrifuge = new Centrifuge("{{ centrifugo_url|escapejs }}");
+  {% endif %}
+
+  centrifuge.on('connecting', function (ctx) {
+    console.log('connecting: ' + ctx.code + ', ' + ctx.reason);
+  }).on('connected', function (ctx) {
+    console.log('connected over ' + ctx.transport);
+  }).on('disconnected', function (ctx) {
+    console.log('disconnected: ' + ctx.code + ', ' + ctx.reason);
+  }).connect();
+
+  const sub = centrifuge.newSubscription("question:{{ question.pk }}");
+
+  sub.on('publication', function (ctx) {
+    showAnswer(ctx.data.answer_id);
+  }).on('subscribing', function (ctx) {
+    console.log('subscribing: ' + ctx.code + ', ' + ctx.reason);
+  }).on('subscribed', function (ctx) {
+    console.log('subscribed', ctx);
+  }).on('unsubscribed', function (ctx) {
+    console.log('unsubscribed: ' + ctx.code + ', ' + ctx.reason);
+  }).on('error', function (ctx) {
+    console.error('subscription error', ctx);
+  }).subscribe();
+</script>
+
+{% if user.is_authenticated %}
+<script type="text/javascript">
+  const form = document.getElementById('answer-form');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"]');
+    const csrf = form.querySelector('[name=csrfmiddlewaretoken]');
+    btn.disabled = true;
+    fetch(window.location.href, {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': csrf.value
+      },
+      body: new FormData(form)
+    })
+      .then(function (r) { return r.json().then(function (data) { return { ok: r.ok, data: data }; }); })
+      .then(function (res) {
+        if (!res.ok) {
+          alert(res.data.errors?.text?.[0] || res.data.errors?.__all__?.[0] || 'Ошибка отправки');
+          return;
+        }
+        form.querySelector('textarea').value = '';
+        showAnswer(res.data.answer.answer_id);
+      })
+      .catch(function () { alert('Не удалось отправить ответ'); })
+      .finally(function () { btn.disabled = false; });
+  });
+</script>
+{% endif %}
+{% endblock %}

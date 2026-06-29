@@ -1,19 +1,29 @@
-<div class="card mb-4 border-0 border-bottom rounded-0">
+{% load user_extras humanize vote_extras %}
+<div id="answer-{{ answer.id }}" class="card mb-4 border-0 border-bottom rounded-0 js-answer-card" data-answer-id="{{ answer.id }}">
     <div class="card-body p-3 d-flex gap-4">
         <div class="d-flex flex-column align-items-center" style="min-width: 60px;">
-            {% include "questions/partials/vote_count.html" with object=answer %}
-            {% if answer.accepted == 1 %}
-            <button class="correct-btn accepted fs-4" title="Accepted Answer" disabled>&#10003;</button>
-            {% endif %}
+            {% url "questions:answer_vote" answer_id=answer.pk as answer_vote_url %}
+            {% include "questions/partials/vote_count.html" with object=answer vote_submit_url=answer_vote_url user_vote=answer_votes|get_vote:answer.pk %}
         </div>
         <div class="flex-grow-1 d-flex flex-column">
-            <p class="card-text text-dark mb-4 pt-2" style="font-size: 1rem; line-height: 1.6;">{{ answer.text }}</p>
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-2 pt-2">
+                <span class="badge bg-success js-correct-badge"{% if question.correct_answer_id != answer.id %} style="display: none;"{% endif %}>Правильный ответ</span>
+                {% if user_is_question_author %}
+                <button
+                    type="button"
+                    class="btn btn-sm btn-outline-success js-mark-correct"
+                    data-answer-id="{{ answer.id }}"
+                    {% if question.correct_answer_id == answer.id %}disabled{% endif %}
+                >Отметить верным</button>
+                {% endif %}
+            </div>
+            <p class="card-text text-dark mb-4" style="font-size: 1rem; line-height: 1.6;">{{ answer.text }}</p>
             <div class="mt-auto d-flex justify-content-end">
                 <div class="p-2 rounded d-flex gap-2 align-items-center" style="background-color: #e8efe9; min-width: 180px;">
-                    <img src={{ answer.user_avatar }} class="rounded shadow-sm avatar-36" alt="Avatar">
+                    <img src="{% avatar_url answer.author %}" class="rounded shadow-sm avatar-36" alt="Avatar">
                     <div class="d-flex flex-column" style="line-height: 1.2;">
-                        <span class="text-muted" style="font-size: 0.75rem;">answered {{ answer.posting_time }} ago</span>
-                        <span class="text-decoration-none fw-bold" style="color: var(--accent-primary); font-size: 0.85rem;">{{ answer.user }}</span>
+                        <span class="text-muted" style="font-size: 0.75rem;">answered {{ answer.created_at|timesince }} ago</span>
+                        <span class="text-decoration-none fw-bold" style="color: var(--accent-primary); font-size: 0.85rem;">{% if answer.author %}{{ answer.author.get_username }}{% else %}deleted{% endif %}</span>
                     </div>
                 </div>
             </div>

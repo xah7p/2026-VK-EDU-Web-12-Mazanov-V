@@ -1,118 +1,133 @@
-from typing import Any
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import redirect_to_login
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.views.generic import FormView, TemplateView
+from django.conf import settings
 
-from django.shortcuts import render
-from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.views.generic import TemplateView
-
-ANSWERS = [
-    {
-        'accepted': i == 0,
-        'user_avatar': '/static/default_user_avatar.png',
-        'user': f"user {i}",
-        'text': f"Text {i}",
-        'vote_count': 20 - i,
-        'posting_time': f'{i} mins',
-    }
-    for i in range(30)
-]
-
-QUESTIONS = [
-    {
-        'id': i,
-        'title': f"Title {i}",
-        'text': f"Text {i}",
-        'user': f"user{i}",
-        'user_avatar': '/static/default_user_avatar.png',
-        'tags': [f"tag{i}", f"tag{i + 1}"],
-        'vote_count': 5,
-        'viewed': i,
-        'answers': ANSWERS,
-        'answers_count': len(ANSWERS),
-        'posting_time': '10 mins',
-    }
-    for i in range(30)
-]
+from questions.context import get_sidebar_context
+from questions.forms import AnswerForm, AskQuestionForm
+from questions.models import Answer, Question
+from questions.tasks import send_answer_to_centrifugo, send_new_answer_email
+from questions.centrifugo_utils import get_centrifugo_token
 
 
-BEST_MEMBERS = [
-    {
-        'name': f'user{i}',
-        'avatar': '/static/default_user_avatar.png'
-    }
-    for i in range(4)
-]
-
-POPULAR_TAGS = [
-    f'tag{i}'
-    for i in range(5)
-]
-
-def paginate(objects_list, request, per_page=10):
-    page_number = request.GET.get('page', 1)
-    paginator = Paginator(objects_list, per_page)
+def _answer_page_number(question_id: int, answer_id: int, per_page: int = 10) -> int:
+    ids = list(
+        Answer.objects.for_question(question_id).values_list("pk", flat=True)
+    )
     try:
-        page = paginator.get_page(page_number)
-    except PageNotAnInteger or EmptyPage:
-        page = paginator.get_page(1)
-    return page
+        idx = ids.index(answer_id)
+    except ValueError:
+        return 1
+    return idx // per_page + 1
 
-class HomePageView(TemplateView):
-    template_name = 'questions/index.html'
-    
+
+class SidebarMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        page = paginate(QUESTIONS, self.request)
-        context['page_obj'] = page
-        context['questions'] = page.object_list
-        context['best_members'] = BEST_MEMBERS
-        context['popular_tags'] = POPULAR_TAGS
+        context.update(get_sidebar_context())
         return context
 
-class HotPageView(TemplateView):
-    template_name = 'questions/hot.html'
-    
+
+class HomePageView(SidebarMixin, TemplateView):
+    template_name = "questions/index.html"
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        page = paginate(QUESTIONS[::-1], self.request)
-        context['page_obj'] = page
-        context['questions'] = page.object_list
-        context['best_members'] = BEST_MEMBERS
-        context['popular_tags'] = POPULAR_TAGS
+        context.update(Question.objects.list_context_new(self.request))
         return context
 
-class TagPageView(TemplateView):
-    template_name = 'questions/tag.html'
-    
+
+class HotPageView(SidebarMixin, TemplateView):
+    template_name = "questions/hot.html"
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        page = paginate(QUESTIONS[1:11], self.request, 4)
-        context['tag_name'] = kwargs['tag_name']
-        context['page_obj'] = page
-        context['questions'] = page.object_list
-        context['best_members'] = BEST_MEMBERS
-        context['popular_tags'] = POPULAR_TAGS
-        return context
-    
-class AskPageView(TemplateView):
-    template_name = 'questions/ask.html'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['best_members'] = BEST_MEMBERS
-        context['popular_tags'] = POPULAR_TAGS
+        context.update(Question.objects.list_context_best(self.request))
         return context
 
-class QuestionPageView(TemplateView):
-    template_name = 'questions/question.html'
-    
+
+class TagPageView(SidebarMixin, TemplateView):
+    template_name = "questions/tag.html"
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        question_id = kwargs['question_id']
-        try:
-            question_id = int(question_id)
-        except ValueError:
-            question_id = 1
-        context['question'] = QUESTIONS[question_id]
-        context['best_members'] = BEST_MEMBERS
-        context['popular_tags'] = POPULAR_TAGS
+        context.update(
+            Question.objects.list_context_for_tag(
+                self.request,
+                self.kwargs["tag_name"],
+            )
+        )
         return context
+
+
+class AskPageView(LoginRequiredMixin, SidebarMixin, FormView):
+    template_name = "questions/ask.html"
+    form_class = AskQuestionForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        question = form.save()
+        return redirect(question.get_absolute_url())
+
+
+class QuestionPageView(SidebarMixin, TemplateView):
+    template_name = "questions/question.html"
+
+    def post(self, request, *args, **kwargs):
+        question = get_object_or_404(Question, pk=kwargs["question_id"])
+        if not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path())
+        form = AnswerForm(request.user, question, request.POST)
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
+        if form.is_valid():
+            answer = form.save()
+            send_answer_to_centrifugo.delay(answer.id)
+            send_new_answer_email.delay(answer.id)
+            if is_ajax:
+                return JsonResponse({"answer": {"answer_id": answer.id}})
+            form = AnswerForm(request.user, question)
+
+        if is_ajax:
+            errors = {}
+            if form.non_field_errors():
+                errors["__all__"] = [str(e) for e in form.non_field_errors()]
+            if "text" in form.errors:
+                errors["text"] = [str(e) for e in form.errors["text"]]
+            return JsonResponse({"errors": errors}, status=400)
+
+        context = self.get_context_data(answer_form=form, **kwargs)
+        return self.render_to_response(context)
+
+    def get_context_data(self, answer_form=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            Question.objects.detail_context(
+                self.request,
+                self.kwargs["question_id"],
+            )
+        )
+        question = context["question"]
+        if answer_form is not None:
+            context["answer_form"] = answer_form
+        elif self.request.user.is_authenticated:
+            context["answer_form"] = AnswerForm(self.request.user, question)
+        else:
+            context["answer_form"] = None
+        
+        if self.request.user.is_authenticated:
+            context["centrifugo_token"] = get_centrifugo_token(self.request.user.id)
+        else:
+            context["centrifugo_token"] = None
+        context["question_id"] = self.kwargs["question_id"]
+
+        context["centrifugo_url"] = f"ws://{settings.CENTRIFUGO_HOST}:{settings.CENTRIFUGO_PORT}/connection/websocket"
+ 
+        return context
+

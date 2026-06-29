@@ -5,9 +5,13 @@
 </div>
 
 <div class="question-list">
-    {% for question in questions %}
-        {% include "questions/partials/question_preview.html" %}
-    {% endfor %}
+    {% if questions %}
+        {% for question in questions %}
+            {% include "questions/partials/question_preview.html" %}
+        {% endfor %}
+    {% else %}
+        <p class="text-muted">По этому тегу пока нет вопросов.</p>
+    {% endif %}
 </div>
 {% include "questions/partials/pagination.html" %}
 {% endblock %}
